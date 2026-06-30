@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WxCenter — Alerts, Outlooks, Storm Reports &amp; More</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --navy-deep:#0B1220;
+            --navy-panel:#121A2B;
+            --navy-line:#23304a;
+            --signal-green:#39E58C;
+            --warning-amber:#FFB020;
+            --alert-red:#FF4D5E;
+            --ink:#E8ECF1;
+            --ink-dim:#8C9BB5;
+            --card-hover:#161F33;
+            --font-display:'Oswald', sans-serif;
+            --font-body:'IBM Plex Sans', sans-serif;
+            --font-mono:'IBM Plex Mono', monospace;
+        }
+        html[data-theme="light"]{
+            --navy-deep:#F3F1EA;
+            --navy-panel:#FFFFFF;
+            --navy-line:#DDD8CB;
+            --signal-green:#1C9A5B;
+            --warning-amber:#B36A00;
+            --alert-red:#C8313F;
+            --ink:#1A1F2B;
+            --ink-dim:#5C6478;
+            --card-hover:#EDEAE0;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        html{scroll-behavior:smooth;}
+        body{
+            background:var(--navy-deep);
+            color:var(--ink);
+            font-family:var(--font-body);
+            line-height:1.5;
+            overflow-x:hidden;
+            transition:background .25s ease, color .25s ease;
+        }
+        a{color:inherit;}
+        :focus-visible{outline:2px solid var(--signal-green); outline-offset:3px;}
+
+        /* ---------- Ticker ---------- */
+        .ticker-bar{
+            background:var(--navy-panel);
+            border-bottom:1px solid var(--navy-line);
+            overflow:hidden;
+            white-space:nowrap;
+            position:relative;
+        }
+        .ticker-track{
+            display:inline-flex;
+            gap:3rem;
+            padding:0.55rem 0;
+            animation:scroll 32s linear infinite;
+            font-family:var(--font-mono);
+            font-size:0.78rem;
+            letter-spacing:0.02em;
+        }
+        @media (prefers-reduced-motion: reduce){ .ticker-track{animation:none;} }
+        .ticker-track span{display:inline-flex;align-items:center;gap:0.5rem;color:var(--ink-dim);}
+        .ticker-track .tag{
+            font-weight:600;
+            padding:0.1rem 0.45rem;
+            border-radius:3px;
+            font-size:0.68rem;
+            letter-spacing:0.06em;
+        }
+        .tag.adv{background:rgba(255,176,32,0.15); color:var(--warning-amber);}
+        .tag.wrn{background:rgba(255,77,94,0.15); color:var(--alert-red);}
+        .tag.out{background:rgba(57,229,140,0.15); color:var(--signal-green);}
+        @keyframes scroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+
+        /* ---------- Nav ---------- */
+        nav{
+            display:flex; align-items:center; justify-content:space-between;
+            padding:1.1rem 2.5rem;
+            border-bottom:1px solid var(--navy-line);
+        }
+        .logo{
+            font-family:var(--font-display);
+            font-weight:700;
+            font-size:1.3rem;
+            letter-spacing:0.02em;
+            display:flex; align-items:center; gap:0.5rem;
+        }
+        .logo-dot{
+            width:9px;height:9px;border-radius:50%;
+            background:var(--signal-green);
+            box-shadow:0 0 8px var(--signal-green);
+            flex-shrink:0;
+        }
+        nav .links{display:flex; gap:2rem; font-size:0.9rem; color:var(--ink-dim);}
+        nav .links a{text-decoration:none; transition:color .15s;}
+        nav .links a:hover{color:var(--ink);}
+        .nav-right{display:flex; align-items:center; gap:0.8rem;}
+        .gh-btn{
+            border:1px solid var(--navy-line);
+            padding:0.5rem 1rem;
+            border-radius:6px;
+            font-size:0.85rem;
+            text-decoration:none;
+            color:var(--ink);
+            transition:border-color .15s, background .15s;
+        }
+        .gh-btn:hover{border-color:var(--signal-green); background:rgba(57,229,140,0.06);}
+        .theme-toggle{
+            border:1px solid var(--navy-line);
+            background:transparent;
+            color:var(--ink);
+            width:38px; height:38px;
+            border-radius:6px;
+            cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+            transition:border-color .15s, background .15s;
+            font-size:1rem;
+        }
+        .theme-toggle:hover{border-color:var(--signal-green);}
+        @media (max-width:760px){ nav .links{display:none;} }
+
+        /* ---------- Hero ---------- */
+        .hero{
+            position:relative;
+            padding:6rem 2.5rem 7rem;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            min-height:74vh;
+            overflow:hidden;
+        }
+        .radar-wrap{
+            position:absolute;
+            top:50%; left:50%;
+            width:min(900px, 130vw);
+            aspect-ratio:1;
+            transform:translate(-50%,-50%);
+            pointer-events:none;
+        }
+        .radar-ring{ position:absolute; inset:0; border-radius:50%; border:1px solid rgba(57,229,140,0.16); }
+        .radar-ring:nth-child(2){inset:12%;}
+        .radar-ring:nth-child(3){inset:24%;}
+        .radar-ring:nth-child(4){inset:36%;}
+        .radar-sweep{
+            position:absolute; inset:0;
+            border-radius:50%;
+            background:conic-gradient(from 0deg, rgba(57,229,140,0.32), rgba(57,229,140,0) 28%);
+            animation:sweep 5s linear infinite;
+        }
+        @keyframes sweep{ to{ transform:rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce){ .radar-sweep{animation:none;} }
+
+        .hero-content{ position:relative; z-index:2; text-align:center; max-width:780px; }
+        .eyebrow{
+            font-family:var(--font-mono);
+            font-size:0.78rem;
+            color:var(--signal-green);
+            letter-spacing:0.14em;
+            text-transform:uppercase;
+            margin-bottom:1.4rem;
+            display:inline-flex; align-items:center; gap:0.6rem;
+        }
+        .eyebrow::before, .eyebrow::after{ content:""; width:24px; height:1px; background:rgba(57,229,140,0.5); }
+        h1{
+            font-family:var(--font-display);
+            font-weight:700;
+            font-size:clamp(2.5rem, 5.6vw, 4.3rem);
+            line-height:1.04;
+            letter-spacing:-0.01em;
+            text-transform:uppercase;
+        }
+        h1 .accent{color:var(--signal-green);}
+        .hero p.sub{ margin:1.6rem auto 0; max-width:560px; color:var(--ink-dim); font-size:1.06rem; }
+        .hero-ctas{ margin-top:2.4rem; display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+        .btn{
+            font-family:var(--font-body); font-weight:600; font-size:0.92rem;
+            padding:0.85rem 1.7rem; border-radius:7px; text-decoration:none;
+            transition:transform .15s, box-shadow .15s, background .15s;
+            display:inline-flex; align-items:center; gap:0.5rem; border:none; cursor:pointer;
+        }
+        .btn-primary{ background:var(--signal-green); color:#06150D; }
+        .btn-primary:hover{transform:translateY(-2px); box-shadow:0 8px 24px rgba(57,229,140,0.25);}
+        .btn-ghost{ border:1px solid var(--navy-line); color:var(--ink); background:transparent; }
+        .btn-ghost:hover{border-color:var(--ink-dim); transform:translateY(-2px);}
+
+        /* ---------- Section shared ---------- */
+        section{padding:5.5rem 2.5rem;}
+        .section-inner{max-width:1100px; margin:0 auto;}
+        .section-head{margin-bottom:3rem; max-width:580px;}
+        .section-head .eyebrow{margin-bottom:1rem;}
+        .section-head h2{
+            font-family:var(--font-display); font-weight:600;
+            font-size:clamp(1.8rem, 3.4vw, 2.4rem);
+            text-transform:uppercase; letter-spacing:-0.01em;
+        }
+        .section-head p{color:var(--ink-dim); margin-top:0.9rem;}
+
+        /* ---------- Feature grid (12 planned features) ---------- */
+        .features{
+            display:grid;
+            grid-template-columns:repeat(4, 1fr);
+            gap:1px;
+            background:var(--navy-line);
+            border:1px solid var(--navy-line);
+            border-radius:10px;
+            overflow:hidden;
+        }
+        @media (max-width:920px){ .features{grid-template-columns:repeat(2, 1fr);} }
+        @media (max-width:560px){ .features{grid-template-columns:1fr;} }
+        .feature{ background:var(--navy-panel); padding:2rem 1.8rem; transition:background .15s; }
+        .feature:hover{background:var(--card-hover);}
+        .feature .ficon{ font-size:1.4rem; display:block; margin-bottom:1rem; }
+        .feature h3{
+            font-family:var(--font-display); font-size:1.1rem;
+            text-transform:uppercase; margin-bottom:0.55rem; font-weight:600;
+        }
+        .feature p{color:var(--ink-dim); font-size:0.88rem;}
+        .feature .status{
+            display:inline-block; margin-top:0.9rem;
+            font-family:var(--font-mono); font-size:0.66rem;
+            letter-spacing:0.06em; text-transform:uppercase;
+            padding:0.18rem 0.5rem; border-radius:4px;
+            background:rgba(57,229,140,0.12); color:var(--signal-green);
+        }
+
+        /* ---------- Tempest callout ---------- */
+        .tempest{
+            background:var(--navy-panel);
+            border:1px solid var(--navy-line);
+            border-radius:12px;
+            padding:2.5rem;
+            display:grid;
+            grid-template-columns:1.1fr 1fr;
+            gap:2.5rem;
+            align-items:center;
+        }
+        @media (max-width:820px){ .tempest{grid-template-columns:1fr;} }
+        .tempest h3{
+            font-family:var(--font-display); text-transform:uppercase;
+            font-size:1.5rem; margin-bottom:0.8rem;
+        }
+        .tempest p{color:var(--ink-dim); font-size:0.95rem; margin-bottom:1rem;}
+        .tempest ul{list-style:none; color:var(--ink-dim); font-size:0.88rem;}
+        .tempest li{ padding-left:1.3rem; position:relative; margin-bottom:0.5rem; }
+        .tempest li::before{ content:"›"; position:absolute; left:0; color:var(--signal-green); font-weight:700; }
+        .token-card{
+            background:var(--navy-deep);
+            border:1px solid var(--navy-line);
+            border-radius:10px;
+            padding:1.5rem;
+            font-family:var(--font-mono);
+        }
+        .token-card label{ display:block; font-size:0.72rem; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.6rem; }
+        .token-row{ display:flex; gap:0.6rem; }
+        .token-row input{
+            flex:1; background:var(--navy-panel); border:1px solid var(--navy-line);
+            color:var(--ink); padding:0.65rem 0.8rem; border-radius:6px;
+            font-family:var(--font-mono); font-size:0.82rem;
+        }
+        .token-row input:focus-visible{outline:2px solid var(--signal-green);}
+        .token-row button{
+            background:var(--signal-green); color:#06150D; border:none;
+            padding:0 1.1rem; border-radius:6px; font-weight:600; cursor:pointer;
+            font-family:var(--font-body); font-size:0.85rem;
+        }
+        .token-note{ font-size:0.72rem; color:var(--ink-dim); margin-top:0.8rem; font-family:var(--font-body); }
+        .token-status{ font-size:0.72rem; margin-top:0.6rem; color:var(--signal-green); display:none; }
+
+        /* ---------- Stack strip ---------- */
+        .stack-strip{ background:var(--navy-panel); border-top:1px solid var(--navy-line); border-bottom:1px solid var(--navy-line); }
+        .stack-row{ display:flex; flex-wrap:wrap; gap:0.6rem 1.2rem; font-family:var(--font-mono); font-size:0.82rem; color:var(--ink-dim); align-items:center; }
+        .stack-row .pip{color:var(--signal-green);}
+
+        /* ---------- Flow ---------- */
+        .flow{ margin-top:3rem; display:grid; grid-template-columns:repeat(4, 1fr); gap:1.5rem; }
+        @media (max-width:860px){ .flow{grid-template-columns:1fr;} }
+        .flow-step{ position:relative; padding-left:1.6rem; border-left:2px solid var(--navy-line); }
+        .flow-step .fnum{ font-family:var(--font-mono); font-size:0.78rem; color:var(--signal-green); display:block; margin-bottom:0.6rem; }
+        .flow-step h4{ font-family:var(--font-display); font-size:1.05rem; text-transform:uppercase; margin-bottom:0.45rem; }
+        .flow-step p{color:var(--ink-dim); font-size:0.88rem;}
+
+        /* ---------- CTA band ---------- */
+        .cta-band{ text-align:center; padding:5rem 2.5rem; }
+        .cta-band h2{
+            font-family:var(--font-display); font-size:clamp(1.8rem, 4vw, 2.6rem);
+            text-transform:uppercase; max-width:640px; margin:0 auto 1rem;
+        }
+        .cta-band p{color:var(--ink-dim); max-width:480px; margin:0 auto 2rem;}
+
+        /* ---------- Footer ---------- */
+        footer{
+            border-top:1px solid var(--navy-line); padding:2rem 2.5rem;
+            display:flex; justify-content:space-between; align-items:center;
+            flex-wrap:wrap; gap:1rem; font-size:0.85rem; color:var(--ink-dim);
+        }
+        footer .f-links{display:flex; gap:1.5rem;}
+        footer a{text-decoration:none;}
+        footer a:hover{color:var(--ink);}
+    </style>
+</head>
+<body>
+
+<div class="ticker-bar" role="marquee" aria-label="Sample weather alert ticker">
+    <div class="ticker-track">
+        <span><span class="tag wrn">WARNING</span> Severe Thunderstorm Warning issued for Hamilton County, TN</span>
+        <span><span class="tag adv">ADVISORY</span> Heat Advisory in effect through 8 PM EDT</span>
+        <span><span class="tag out">OUTLOOK</span> Enhanced risk for severe storms — Day 2 Convective Outlook</span>
+        <span><span class="tag wrn">REPORT</span> 1.75in hail reported near Chattanooga, TN</span>
+        <span><span class="tag wrn">WARNING</span> Severe Thunderstorm Warning issued for Hamilton County, TN</span>
+        <span><span class="tag adv">ADVISORY</span> Heat Advisory in effect through 8 PM EDT</span>
+        <span><span class="tag out">OUTLOOK</span> Enhanced risk for severe storms — Day 2 Convective Outlook</span>
+        <span><span class="tag wrn">REPORT</span> 1.75in hail reported near Chattanooga, TN</span>
+    </div>
+</div>
+
+<nav>
+    <div class="logo"><span class="logo-dot"></span>WxCenter</div>
+    <div class="links">
+        <a href="#features">Platform</a>
+        <a href="#tempest">Tempest</a>
+        <a href="#flow">How it works</a>
+    </div>
+    <div class="nav-right">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark and light theme">🌙</button>
+        <a class="gh-btn" href="https://github.com/Zachdehooge/WxCenter" target="_blank" rel="noopener">View on GitHub</a>
+    </div>
+</nav>
+
+<header class="hero">
+    <div class="radar-wrap" aria-hidden="true">
+        <div class="radar-ring"></div>
+        <div class="radar-ring"></div>
+        <div class="radar-ring"></div>
+        <div class="radar-ring"></div>
+        <div class="radar-sweep"></div>
+    </div>
+    <div class="hero-content">
+        <div class="eyebrow">Spring Boot weather platform</div>
+        <h1>Everything between<br>the <span class="accent">watch</span> and the <span class="accent">damage report</span></h1>
+        <p class="sub">WxCenter brings alerts, outlooks, storm reports, radar, and your own Tempest station into one console — built on Spring Boot, designed for people who track weather closely.</p>
+        <div class="hero-ctas">
+            <a class="btn btn-primary" href="https://github.com/Zachdehooge/WxCenter" target="_blank" rel="noopener">Get the source →</a>
+            <a class="btn btn-ghost" href="#features">See planned features</a>
+        </div>
+    </div>
+</header>
+
+<section id="features">
+    <div class="section-inner">
+        <div class="section-head">
+            <div class="eyebrow">Planned features</div>
+            <h2>One console, every feed you'd otherwise have ten tabs open for</h2>
+            <p>WxCenter is under active development. Here's what's on the roadmap.</p>
+        </div>
+        <div class="features">
+            <div class="feature">
+                <span class="ficon">🌩️</span>
+                <h3>Live alerts</h3>
+                <p>Active watches, warnings, and advisories as they're issued for your area.</p>
+                <span class="status">Planned</span>
+            </div>
+            <div class="feature">
+                <span class="ficon">🗺️</span>
+                <h3>SPC outlooks</h3>
+                <p>Convective outlook categories from the Storm Prediction Center, day by day.</p>
+                <span class="status">Planned</span>
+            </div>
+            <div class="feature">
+                <span class="ficon">🌪️</span>
+                <h3>Storm reports</h3>
+                <p>Ground-truth hail, wind, and tornado reports as spotters and offices log them.</p>
+                <span class="status">Planned</span>
+            </div>
+            <div class="feature">
+                <span class="ficon">📷</span>
+                <h3>Damage assessment images</h3>
+                <p>Download post-storm damage survey imagery directly from the platform.</p>
+                <span class="status">Planned</span>
+            </div>
+            <div class="feature">
+                <span class="ficon">🌡️</span>
+                <h3>Tempest integration</h3>
+                <p>Pull live readings from your own Tempest WeatherFlow station via personal API token.</p>
+                <span class="status">Planned</span>
+            </div>
+            <div class="feature">
+                <span class="ficon">📡</span>
+                <h3>Radar imagery</h3>
+                <p>Current radar layers laid over the areas you're watching.</p>
+                <span class="status">Planned</span>
+            </div>
+            <div class="feature">
+                <span class="ficon">📈</span>
+                <h3>Current observations</h3>
+                <p>Live surface obs — temperature, wind, pressure — pulled from nearby stations.</p>
+                <span class="status">Planned</span>
+            </div>
+            <div class="feature">
+                <span class="ficon">🗂️</span>
+                <h3>Historical event search</h3>
+                <p>Look back at past alerts, reports, and outlooks for any date or location.</p>
+                <span class="status">Planned</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="tempest">
+    <div class="section-inner">
+        <div class="section-head">
+            <div class="eyebrow">Personal station</div>
+            <h2>Bring your own Tempest token</h2>
+            <p>WxCenter can read directly from your Tempest WeatherFlow station once you supply a personal API token.</p>
+        </div>
+        <div class="tempest">
+            <div>
+                <h3>How the token works</h3>
+                <p>Your token is saved locally in the browser tab — it's never sent anywhere except directly to the Tempest API to pull your station's data.</p>
+                <ul>
+                    <li>Generate a personal access token from your Tempest account</li>
+                    <li>Paste it in once — WxCenter keeps it for the session</li>
+                    <li>Station readings populate automatically alongside alerts and outlooks</li>
+                </ul>
+            </div>
+            <div class="token-card">
+                <label for="tempestToken">Tempest API token</label>
+                <div class="token-row">
+                    <input type="password" id="tempestToken" placeholder="Paste your token here" autocomplete="off">
+                    <button type="button" id="tokenSave">Save</button>
+                </div>
+                <p class="token-note">Stored in this tab only, for demo purposes. Nothing is transmitted on this page.</p>
+                <p class="token-status" id="tokenStatus">Token saved for this tab ✓</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="flow">
+    <div class="section-inner">
+        <div class="section-head">
+            <div class="eyebrow">How it works</div>
+            <h2>From raw feeds to one screen</h2>
+        </div>
+        <div class="flow">
+            <div class="flow-step">
+                <span class="fnum">01</span>
+                <h4>Ingest</h4>
+                <p>The Spring Boot backend pulls alerts, outlooks, reports, and radar on a schedule.</p>
+            </div>
+            <div class="flow-step">
+                <span class="fnum">02</span>
+                <h4>Connect</h4>
+                <p>Add your Tempest token to layer in live readings from your own station.</p>
+            </div>
+            <div class="flow-step">
+                <span class="fnum">03</span>
+                <h4>Serve</h4>
+                <p>Endpoints expose current conditions, history, and damage imagery on request.</p>
+            </div>
+            <div class="flow-step">
+                <span class="fnum">04</span>
+                <h4>Track</h4>
+                <p>Favorite your locations, set your theme, and watch the feeds that matter to you.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-band">
+    <div class="eyebrow" style="justify-content:center;">Open source</div>
+    <p>WxCenter is on GitHub and under active development. Clone it, read the code, or open an issue.</p>
+    <a class="btn btn-primary" href="https://github.com/Zachdehooge/WxCenter" target="_blank" rel="noopener">github.com/Zachdehooge/WxCenter →</a>
+</section>
+
+<footer>
+    <div class="logo" style="font-size:1rem;"><span class="logo-dot"></span>WxCenter</div>
+    <div class="f-links">
+        <a href="https://github.com/Zachdehooge/WxCenter" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/Zachdehooge/WxCenter/issues" target="_blank" rel="noopener">Issues</a>
+    </div>
+</footer>
+
+<script>
+    (function(){
+        var root = document.documentElement;
+        var toggle = document.getElementById('themeToggle');
+        function applyTheme(theme){
+            root.setAttribute('data-theme', theme);
+            toggle.textContent = theme === 'light' ? '☀️' : '🌙';
+        }
+        applyTheme('dark');
+        toggle.addEventListener('click', function(){
+            var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            applyTheme(next);
+        });
+
+        var saveBtn = document.getElementById('tokenSave');
+        var status = document.getElementById('tokenStatus');
+        var input = document.getElementById('tempestToken');
+        saveBtn.addEventListener('click', function(){
+            if(!input.value.trim()) return;
+            status.style.display = 'block';
+            setTimeout(function(){ status.style.display = 'none'; }, 3000);
+        });
+    })();
+</script>
+
+</body>
+</html>
