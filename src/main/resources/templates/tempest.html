@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WxCenter — Alerts, Outlooks, Storm Reports &amp; More</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="/css/page.css">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: siteHeader}"></div>
+
+<section id="tempest">
+    <div class="section-inner">
+        <div class="section-head">
+            <div class="eyebrow">Personal station</div>
+            <h2>Bring your own Tempest token</h2>
+            <p>WxCenter can read directly from your Tempest WeatherFlow station once you supply a personal API token.</p>
+        </div>
+        <div class="tempest">
+            <div>
+                <h3>How the token works</h3>
+                <p>Your token is saved locally in the browser tab — it's never sent anywhere except directly to the Tempest API to pull your station's data.</p>
+                <ul>
+                    <li>Generate a personal access token from your Tempest account</li>
+                    <li>Paste it in once — WxCenter keeps it for the session</li>
+                    <li>Station readings populate automatically alongside alerts and outlooks</li>
+                </ul>
+            </div>
+            <div class="token-card">
+                <label for="tempestToken">Tempest API token</label>
+                <div class="token-row">
+                    <input type="password" id="tempestToken" placeholder="Paste your token here" autocomplete="off">
+                    <button type="button" id="tokenSave">Save</button>
+                </div>
+                <p class="token-note">Stored in this tab only, for demo purposes. Nothing is transmitted on this page.</p>
+                <p class="token-status" id="tokenStatus">Token saved for this tab ✓</p>
+            </div>
+        </div>
+    </div>
+</section>
+<script src="/js/index.js"></script>
+</body>
+</html>

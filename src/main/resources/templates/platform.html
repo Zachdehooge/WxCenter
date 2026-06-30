@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WxCenter — Alerts, Outlooks, Storm Reports &amp; More</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="/css/page.css">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: siteHeader}"></div>
+
+<section id="features">
+    <div class="section-inner">
+        <div class="section-head">
+            <div class="eyebrow">Planned features</div>
+            <h2>One console, every feed you'd otherwise have ten tabs open for</h2>
+            <p>WxCenter is under active development. Here's what's on the roadmap.</p>
+        </div>
+        <div class="features">
+            <div class="feature">
+                <span class="ficon">🌩️</span>
+                <h3>Live alerts</h3>
+                <p>Active watches, warnings, and advisories as they're issued for your area.</p>
+                <span class="status">Planned</span>
+            </div>
+            <div class="feature">
+                <span class="ficon">🗺️</span>
+                <h3>SPC outlooks</h3>
+                <p>Convective outlook categories from the Storm Prediction Center, day by day.</p>
+                <span class="status">Planned</span>
+            </div>
+            <div class="feature">
+                <span class="ficon">🌪️</span>
+                <h3>Storm reports</h3>
+                <p>Ground-truth hail, wind, and tornado reports as spotters and offices log them.</p>
+                <span class="status">Planned</span>
+            </div>
+            <div class="feature">
+                <span class="ficon">📷</span>
+                <h3>Damage assessment images</h3>
+                <p>Download post-storm damage survey imagery directly from the platform.</p>
+                <span class="status">Planned</span>
+            </div>
+            <div class="feature">
+                <span class="ficon">🌡️</span>
+                <h3>Tempest integration</h3>
+                <p>Pull live readings from your own Tempest WeatherFlow station via personal API token.</p>
+                <span class="status">Planned</span>
+            </div>
+            <div class="feature">
+                <span class="ficon">📡</span>
+                <h3>Radar imagery</h3>
+                <p>Current radar layers laid over the areas you're watching.</p>
+                <span class="status">Planned</span>
+            </div>
+            <div class="feature">
+                <span class="ficon">📈</span>
+                <h3>Current observations</h3>
+                <p>Live surface obs — temperature, wind, pressure — pulled from nearby stations.</p>
+                <span class="status">Planned</span>
+            </div>
+            <div class="feature">
+                <span class="ficon">🗂️</span>
+                <h3>Historical event search</h3>
+                <p>Look back at past alerts, reports, and outlooks for any date or location.</p>
+                <span class="status">Planned</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="/js/index.js"></script>
+</body>
+</html>
